@@ -1,0 +1,11 @@
+---
+- name: Install system Python 3 packages
+  become: true
+  yum:
+    name:
+      - python3
+      - python3-pip
+    state:
+      present
+
+
