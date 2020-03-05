@@ -1,11 +1,54 @@
 ---
-- name: Install system Python 3 packages
+
+
+- name: Make sure Ansibe can manage Python
+  become: true
+  yum:
+    name:
+      - python-setuptools
+
+- name: Install core packages for system Python 3
   become: true
   yum:
     name:
       - python3
       - python3-pip
-    state:
-      present
+      - python3-setuptools
+    state: "{{python3_core_state }}"
+    # TODO This would be a good place to install libselinux for python3 if it existed.
+    # But it doesn't (yet), see discussions at:
+    # https://bugzilla.redhat.com/show_bug.cgi?id=1756015
+    # https://bugs.centos.org/view.php?id=16389
 
 
+- name: Install additional packages for system Python 3
+  become: true
+  yum:
+    name: "{{python3_pkgs }}"
+    state: "{{python3_pkgs_state }}"
+
+- name: Create shared python3 user
+  become: true
+  user:
+    name: python3
+    shell: /sbin/nologin
+
+- name: Allow access to python3 user
+  become: true
+  file:
+    path: /home/python3
+    mode: '0755'
+
+- name: Install Python packages as python3 user
+  become: true
+  become_user: python3
+  pip:
+    executable: /usr/bin/pip3
+    extra_args: --user
+    name: "{{python3_pip_pkgs}}"
+
+- name: Add python3 user python packages to path
+  copy:
+    dest: "/etc/profile.d/python3.sh"
+    content: |
+      export PATH="${PATH}:/home/python3/.local/bin"
