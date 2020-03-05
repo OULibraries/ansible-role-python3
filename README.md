@@ -1,7 +1,7 @@
 OULibraries.python3
 =========
 
-Role to standardize install and config of Python 3 packages 
+Role to standardize install and config of Python 3 packages
 
 Requirements
 ------------

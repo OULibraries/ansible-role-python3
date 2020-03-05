@@ -14,7 +14,7 @@
       - python3
       - python3-pip
       - python3-setuptools
-    state: "{{python3_core_state }}"
+    state: "{{ python3_core_state }}"
     # TODO This would be a good place to install libselinux for python3 if it existed.
     # But it doesn't (yet), see discussions at:
     # https://bugzilla.redhat.com/show_bug.cgi?id=1756015
@@ -24,8 +24,8 @@
 - name: Install additional packages for system Python 3
   become: true
   yum:
-    name: "{{python3_pkgs }}"
-    state: "{{python3_pkgs_state }}"
+    name: "{{ python3_pkgs }}"
+    state: "{{ python3_pkgs_state }}"
 
 - name: Create shared python3 user
   become: true
@@ -33,10 +33,12 @@
     name: python3
     shell: /sbin/nologin
 
-- name: Allow access to python3 user
+- name: Make a home for the python install
   become: true
   file:
-    path: /home/python3
+    path:  /opt/python3
+    owner: python3
+    state: directory
     mode: '0755'
 
 - name: Install Python packages as python3 user
@@ -44,11 +46,17 @@
   become_user: python3
   pip:
     executable: /usr/bin/pip3
-    extra_args: --user
-    name: "{{python3_pip_pkgs}}"
+    extra_args: --prefix  /opt/python3
+    name: "{{ python3_pip_pkgs }}"
 
-- name: Add python3 user python packages to path
+- name: Add /opt/python3/bin to PATH
   copy:
     dest: "/etc/profile.d/python3.sh"
     content: |
-      export PATH="${PATH}:/home/python3/.local/bin"
+      export PATH="${PATH}:/opt/python3/bin"
+
+- name: Add packages under /opt/python3/lib  to PYTHONPATH
+  copy:
+    dest: "/usr/lib/python3.6/site-packages/optpython.pth"
+    content: |
+      /opt/python3/lib/python3.6/site-packages/
