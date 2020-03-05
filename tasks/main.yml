@@ -1,13 +1,11 @@
 ---
-
-
-- name: Make sure Ansibe can manage Python
+- name: Install packages required for Ansible to manage Python
   become: true
   yum:
     name:
       - python-setuptools
 
-- name: Install core packages for system Python 3
+- name: Install system Python 3 core packages
   become: true
   yum:
     name:
@@ -20,20 +18,19 @@
     # https://bugzilla.redhat.com/show_bug.cgi?id=1756015
     # https://bugs.centos.org/view.php?id=16389
 
-
 - name: Install additional packages for system Python 3
   become: true
   yum:
     name: "{{ python3_pkgs }}"
     state: "{{ python3_pkgs_state }}"
 
-- name: Create shared python3 user
+- name: Create python3 user to own shared pip packages
   become: true
   user:
     name: python3
     shell: /sbin/nologin
 
-- name: Make a home for the python install
+- name: Make a home for shared pip packages
   become: true
   file:
     path:  /opt/python3
@@ -41,7 +38,7 @@
     state: directory
     mode: '0755'
 
-- name: Install Python packages as python3 user
+- name: Install shared Python3 pip packages
   become: true
   become_user: python3
   pip:
@@ -49,13 +46,15 @@
     extra_args: --prefix  /opt/python3
     name: "{{ python3_pip_pkgs }}"
 
-- name: Add /opt/python3/bin to PATH
+- name: Add shared pip-installed tools to PATH for users
   copy:
     dest: "/etc/profile.d/python3.sh"
     content: |
       export PATH="${PATH}:/opt/python3/bin"
 
-- name: Add packages under /opt/python3/lib  to PYTHONPATH
+# contents of .pth file are added to sys.pth
+# See https://docs.python.org/3/library/site.html
+- name: Add shared pip-installed  modules to system Python 3 PYTHONPATH
   copy:
     dest: "/usr/lib/python3.6/site-packages/optpython.pth"
     content: |
