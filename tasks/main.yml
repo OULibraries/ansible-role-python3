@@ -60,3 +60,4 @@
     dest: "/usr/lib/python3.6/site-packages/optpython.pth"
     content: |
       /opt/python3/lib/python3.6/site-packages/
+      /opt/python3/lib64/python3.6/site-packages/
