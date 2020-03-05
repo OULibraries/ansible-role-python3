@@ -4,7 +4,7 @@
 # Likely values: "present" or "latest"
 python3_core_state: present
 
-# Additional Python 3 rpms to install.
+# Additional RPMs to install. These should all be Python 3 RPMS.
 python3_pkgs: []
 # State of those packages.
 python3_pkgs_state: present
